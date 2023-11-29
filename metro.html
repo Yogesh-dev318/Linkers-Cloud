@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhi Metro Station Distance and Fare</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+            #header {
+                background-color: #e39764; 
+                padding: 20px;
+                text-align: center;
+            }
+
+            
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f0f0f0;
+                margin: 0;
+                padding: 0;
+            }
+
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 53px;
+        }
+
+        .title-and-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+
+        .nav {
+            margin-top: 10px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+
+        .logo-image {
+            width: 50px; 
+            height: 53px; 
+            /* align-content: left; */
+            margin-left: 0px; 
+        }
+        h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+        .popup {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: #fff;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+          z-index: 1000;
+          max-width: 80%;
+          text-align: center;
+        }
+
+        .popup p {
+          font-size: 18px;
+          margin: 0;
+        }
+
+        .logo {
+            max-width: 100px;
+        }
+        
+        .nav {
+            margin-top: 10px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        label {
+          font-weight: bold;
+          display: block;
+        }
+
+        select {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        select:hover {
+          border-color: #ff6600; 
+        }
+
+    
+        button {
+          background-color: #ff6600;
+          color: #fff;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+        .nav a:hover {
+    color: #ff6600;
+    transition: color 0.3s;
+}
+.facilities-box {
+    
+    transition: transform 0.2s, border-color 0.3s;
+}
+
+.facilities-box:hover {
+    transform: scale(1.05);
+    border-color: #ff6600;
+}
+.logo-image {
+    animation: spin 5s;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.popup {
+    
+    animation: slideIn 0.5s ease-in-out;
+}
+
+@keyframes slideIn {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(0); }
+}
+button {
+   
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #ff4400;
+}
+
+        button:hover {
+          background-color: #ff4400; 
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 16px;
+        }
+
+        .facilities-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .facilities-box {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .facilities-box:hover {
+            transform: scale(1.05);
+            border: 1px solid #ff6600;
+        }
+
+        .contact-form {
+            background-color: #f7f7f7;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .contact-form label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .contact-form button {
+            background-color: #ff6600;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .contact-form button:hover {
+            background-color: #ff4400;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        #map {
+            height: 500px; 
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="header-container">
+            <img src="Screenshot 2023-11-07 at 11.48.24 PM.png" alt="Linker Logo" class="logo-image">
+            <div class="title-and-nav">
+                <h1>Linkers</h1>
+                <nav class="nav">
+                    <a href="#header">Home</a>
+                    <a href="#facilities">Facilities</a>
+                    <a href="#contact">Get In Touch</a>
+                    <a href="contact.html">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+   
+    <div id="map"></div>
+
+   
+    <form id="stationForm">
+        <label for="startStation">Start Station:</label>
+        <select id="startStation" required>
+            <option value="" disabled selected>Select a station</option>
+            <option value="New Delhi Metro Station">New Delhi Metro Station</option>
+            <option value="Rajiv Chowk Metro Station">Rajiv Chowk Metro Station</option>
+            <option value="Dwarka Sector 21 Metro Station">Dwarka Sector 21 Metro Station</option>
+            <option value="Hauz Khas Metro Station">Hauz Khas Metro Station</option>
+            <option value="Kashmere Gate Metro Station">Kashmere Gate Metro Station</option>
+            <option value="Malviya Nagar Metro Station">Malviya Nagar Metro Station</option>
+            <option value="Chawri Bazar Metro Station">Chawri Bazar Metro Station</option>
+           
+        </select>
+
+        <label for="endStation">End Station:</label>
+        <select id="endStation" required>
+            <option value="" disabled selected>Select a station</option>
+            <option value="New Delhi Metro Station">New Delhi Metro Station</option>
+            <option value="Rajiv Chowk Metro Station">Rajiv Chowk Metro Station</option>
+            <option value="Dwarka Sector 21 Metro Station">Dwarka Sector 21 Metro Station</option>
+            <option value="Hauz Khas Metro Station">Hauz Khas Metro Station</option>
+            <option value="Kashmere Gate Metro Station">Kashmere Gate Metro Station</option>
+            <option value="Malviya Nagar Metro Station">Malviya Nagar Metro Station</option>
+            <option value="Chawri Bazar Metro Station">Chawri Bazar Metro Station</option>
+            
+        </select>
+
+        <button type="submit">Calculate Distance and Fare</button>
+    </form>
+    <div id="farePopup" class="popup">
+      <p id="fareResult"></p>
+    </div>
+    <!-- <p id="result"></p> -->
+    <div class="container">
+      
+      <p>Welcome to the Delhi Metro Station! We provide efficient and affordable transportation services across Delhi and its neighboring areas.</p>
+
+      <h2 id="facilities">Facilities provided by the metro</h2>
+      <div class="facilities-container">
+          <div class="facilities-box">
+              <h3>Clean and Spacious Stations</h3>
+              <p>Our stations are well-maintained and provide a clean and spacious environment for passengers.</p>
+          </div>
+          <div class="facilities-box">
+              <h3>Accessibility for Everyone</h3>
+              <p>We prioritize accessibility and provide facilities for differently-abled passengers.</p>
+          </div>
+          <div class="facilities-box">
+              <h3>Customer Support</h3>
+              <p>Our dedicated customer support team is available to assist you with any inquiries or concerns.</p>
+          </div>
+          <div class="facilities-box">
+              <h3>Online Ticket Booking</h3>
+              <p>Conveniently book your metro tickets online and save time at the station.</p>
+          </div>
+          <div class "facilities-box">
+              <h3>Security Measures</h3>
+              <p>Your safety is our priority. We have advanced security measures in place at all stations.</p>
+          </div>
+          <div class="facilities-box">
+              <h3>Lost and Found</h3>
+              <p>If you lose something during your journey, our lost and found service can help you retrieve it.</p>
+          </div>
+      </div>
+  </div>
+  <div id="contact" class="container">
+        <h2>Get in Touch</h2>
+        <p>If you have any questions or need assistance, feel free to contact us.</p>
+        <p>Email: info@delhimetrostation.com</p>
+        <p>Phone: +91-XXXXXXXXXX</p>
+
+        <div class="contact-form">
+            <h3>Get in Touch</h3>
+            <form>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2023 Linker
+    </footer>
+
+    
+    <p id="result"></p>
+
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        
+        var map = L.map('map').setView([28.6139, 77.2090], 12); 
+
+      
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        
+        var markers = [];
+
+        
+        function calculateDistance(station1, station2) {
+            var lat1 = station1.getLatLng().lat;
+            var lon1 = station1.getLatLng().lng;
+            var lat2 = station2.getLatLng().lat;
+            var lon2 = station2.getLatLng().lng;
+
+            
+            var R = 6371; 
+            var dLat = (lat2 - lat1) * (Math.PI / 180);
+            var dLon = (lon2 - lon1) * (Math.PI / 180);
+            var a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var distance = R * c;
+
+            return distance;
+        }
+     
+
+        
+        document.getElementById("stationForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var startStation = document.getElementById("startStation").value;
+          var endStation = document.getElementById("endStation").value;
+
+          var station1 = markers.find(function (marker) {
+            return marker.getPopup().getContent() === startStation;
+          });
+
+          var station2 = markers.find(function (marker) {
+            return marker.getPopup().getContent() === endStation;
+          });
+
+          if (station1 && station2) {
+            var distance = calculateDistance(station1, station2);
+            var fare = calculateFlatFare(distance); 
+
+            var fareResult = 'Distance between ' + startStation + ' and ' + endStation + ': ' + distance.toFixed(2) + ' km\nFare: Rs. ' + fare.toFixed(2);
+
+            
+            var farePopup = document.getElementById("farePopup");
+            var fareResultElement = document.getElementById("fareResult");
+            fareResultElement.textContent = fareResult;
+            farePopup.style.display = "block";
+
+            
+            farePopup.addEventListener("click", function () {
+              farePopup.style.display = "none";
+            });
+          } else {
+            alert('Invalid station selection');
+          }
+        });
+
+
+
+       
+        document.getElementById("stationForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            var startStation = document.getElementById("startStation").value;
+            var endStation = document.getElementById("endStation").value;
+
+            var station1 = markers.find(function (marker) {
+                return marker.getPopup().getContent() === startStation;
+            });
+
+            var station2 = markers.find(function (marker) {
+                return marker.getPopup().getContent() === endStation;
+            });
+
+            if (station1 && station2) {
+                var distance = calculateDistance(station1, station2);
+                var fare = calculateFlatFare(distance); 
+                document.getElementById("result").textContent = 'Distance between ' + startStation + ' and ' + endStation + ': ' + distance.toFixed(2) + ' km\nFare: Rs. ' + fare.toFixed(2);
+            } else {
+                alert('Invalid station selection');
+            }
+        });
+
+        
+        function createStationMarker(lat, lng, name) {
+            var marker = L.marker([lat, lng]);
+            marker.bindPopup(name);
+            return marker;
+        }
+
+       
+        markers.push(createStationMarker(28.6286, 77.2205, 'New Delhi Metro Station'));
+        markers.push(createStationMarker(28.6328, 77.2208, 'Rajiv Chowk Metro Station'));
+        markers.push(createStationMarker(28.5921, 77.0462, 'Dwarka Sector 21 Metro Station'));
+        markers.push(createStationMarker(28.5494, 77.2019, 'Hauz Khas Metro Station'));
+        markers.push(createStationMarker(28.5713, 77.2330, 'Saket Metro Station'));
+        markers.push(createStationMarker(28.6416, 77.2232, 'Karol Bagh Metro Station'));
+        markers.push(createStationMarker(28.6135, 77.2073, 'Jama Masjid Metro Station'));
+        markers.push(createStationMarker(28.5507, 77.2693, 'Malviya Nagar Metro Station'));
+        markers.push(createStationMarker(28.6137, 77.2390, 'Chawri Bazar Metro Station'));
+        markers.push(createStationMarker(28.6765, 77.2357, 'Kashmere Gate Metro Station'));
+      
+        markers.forEach(function(marker) {
+            marker.addTo(map);
+
+           
+            marker.on('click', function() {
+                marker.openPopup();
+            });
+        });
+
+        
+        function calculateFlatFare(distance) {
+            
+            return 10 + (distance - 1) * 5; // Rs. 50 for the first kilometer and Rs. 10 for each additional kilometer
+        }
+    </script>
+</body>
+</html>
