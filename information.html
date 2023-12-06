@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhi Metro Station Information</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #header {
+                background-color: #e39764; 
+                padding: 20px;
+                text-align: center;
+            }
+
+            
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f0f0f0;
+                margin: 0;
+                padding: 0;
+            }
+
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 53px;
+        }
+
+        .title-and-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+
+        .nav {
+            margin-top: 10px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+
+        .logo-image {
+            width: 50px; 
+            height: 53px; 
+            /* align-content: left; */
+            margin-left: 0px; 
+        }
+        h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+        .popup {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: #fff;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+          z-index: 1000;
+          max-width: 80%;
+          text-align: center;
+        }
+
+        .popup p {
+          font-size: 18px;
+          margin: 0;
+        }
+
+        .logo {
+            max-width: 100px;
+        }
+        
+        .nav {
+            margin-top: 10px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        label {
+          font-weight: bold;
+          display: block;
+        }
+
+        select {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        select:hover {
+          border-color: #ff6600; 
+        }
+
+    
+        button {
+          background-color: #ff6600;
+          color: #fff;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+        .nav a:hover {
+            color: #ff6600;
+            transition: color 0.3s;
+        }
+        .facilities-box {
+            
+            transition: transform 0.2s, border-color 0.3s;
+        }
+
+        .facilities-box:hover {
+            transform: scale(1.05);
+            border-color: #ff6600;
+        }
+        .logo-image {
+            animation: spin 5s;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .popup {
+            
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(0); }
+        }
+        button {
+        
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ff4400;
+        }
+
+        button:hover {
+          background-color: #ff4400; 
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 16px;
+        }
+
+        .facilities-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .facilities-box {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .facilities-box:hover {
+            transform: scale(1.05);
+            border: 1px solid #ff6600;
+        }
+
+        .contact-form {
+            background-color: #f7f7f7;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .contact-form label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .contact-form button {
+            background-color: #ff6600;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .contact-form button:hover {
+            background-color: #ff4400;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        #map {
+            height: 500px;
+            width: 100%;
+            flex: 1; /* Grow to fill remaining space */
+           
+        }
+        #destinationInfo {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #destinationInfo.active {
+            opacity: 1;
+        }
+        .destination-item {
+            text-align: center;
+            margin: 10px;
+            max-width: 200px;
+        }
+
+        .destination-item img {
+            width: 50px; /* Set the desired width */
+            height: 50px; /* Set the desired height */
+            object-fit: cover; /* Maintain aspect ratio and cover the container */
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="header-container">
+            <img src="Screenshot 2023-11-07 at 11.48.24 PM.png" alt="Linker Logo" class="logo-image">
+            <div class="title-and-nav">
+                <h1>Linkers</h1>
+                <nav class="nav">
+                    <a href="index.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <div>
+        <label for="stationSearch">Search Station:</label>
+        <input type="text" id="stationSearch" placeholder="Type a station name">
+        <button onclick="searchStation()">Search</button>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div id="destinationInfo"></div>
+
+    <footer>
+        &copy; 2023 Linker
+    </footer>
+
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        function searchStation() {
+        var searchQuery = document.getElementById("stationSearch").value;
+        var matchingMarker = markers.find(function (marker) {
+            return marker.getPopup().getContent().toLowerCase().includes(searchQuery.toLowerCase());
+        });
+
+        if (matchingMarker) {
+            map.setView(matchingMarker.getLatLng(), 15);
+            showStationInfo(matchingMarker.getPopup().getContent());
+        } else {
+            alert("Station not found!");
+        }
+    }
+        var map = L.map('map').setView([28.6139, 77.2090], 12); 
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        var markers = [];
+        var destinationInfoElement = document.getElementById('destinationInfo');
+
+        function getDestinations(stationName) {
+            switch (stationName) {
+                case 'New Delhi Metro Station':
+                    return [
+                        { name: 'Connaught Place', imageUrl: 'https://dummyimage.com/150x150/009688/fff&text=Connaught+Place' },
+                        { name: 'India Gate', imageUrl: 'https://dummyimage.com/150x150/FF9800/fff&text=India+Gate' },
+                        { name: 'Jantar Mantar', imageUrl: 'https://dummyimage.com/150x150/673AB7/fff&text=Jantar+Mantar' },
+                    ];
+
+                case 'Rajiv Chowk Metro Station':
+                    return [
+                        { name: 'Palika Bazaar', imageUrl: 'https://dummyimage.com/150x150/673AB7/fff&text=Palika+Bazaar' },
+                        { name: 'Janpath Market', imageUrl: 'https://dummyimage.com/150x150/4CAF50/fff&text=Janpath+Market' },
+                        { name: 'National Museum', imageUrl: 'https://dummyimage.com/150x150/2196F3/fff&text=National+Museum' },
+                    ];
+
+                case 'Dwarka Sector 21 Metro Station':
+                    return [
+                        { name: 'Dwarka City', imageUrl: 'https://dummyimage.com/150x150/FFC107/fff&text=Dwarka+City' },
+                        { name: 'Dwarka Sector 21 Market', imageUrl: 'https://dummyimage.com/150x150/E91E63/fff&text=Dwarka+Sector+21+Market' },
+                        { name: 'NSIT Campus', imageUrl: 'https://dummyimage.com/150x150/795548/fff&text=NSIT+Campus' },
+                    ];
+
+                case 'Hauz Khas Metro Station':
+                    return [
+                        { name: 'Hauz Khas Village', imageUrl: 'https://dummyimage.com/150x150/FFC107/fff&text=Hauz+Khas+Village' },
+                        { name: 'IIT Delhi', imageUrl: 'https://dummyimage.com/150x150/E91E63/fff&text=IIT+Delhi' },
+                        { name: 'Deer Park', imageUrl: 'https://dummyimage.com/150x150/2196F3/fff&text=Deer+Park' },
+                    ];
+
+                case 'Kashmere Gate Metro Station':
+                    return [
+                        { name: 'Red Fort', imageUrl: 'https://dummyimage.com/150x150/795548/fff&text=Red+Fort' },
+                        { name: 'Jama Masjid', imageUrl: 'https://dummyimage.com/150x150/FFC107/fff&text=Jama+Masjid' },
+                        { name: 'Chandni Chowk', imageUrl: 'https://dummyimage.com/150x150/FF9800/fff&text=Chandni+Chowk' },
+                    ];
+
+                case 'Malviya Nagar Metro Station':
+                    return [
+                        { name: 'Qutub Minar', imageUrl: 'https://dummyimage.com/150x150/4CAF50/fff&text=Qutub+Minar' },
+                        { name: 'Select Citywalk Mall', imageUrl: 'https://dummyimage.com/150x150/2196F3/fff&text=Select+Citywalk+Mall' },
+                        { name: 'Lado Sarai Golf Course', imageUrl: 'https://dummyimage.com/150x150/673AB7/fff&text=Lado+Sarai+Golf+Course' },
+                    ];
+
+                case 'Chawri Bazar Metro Station':
+                    return [
+                        { name: 'Chawri Bazar Market', imageUrl: 'https://dummyimage.com/150x150/673AB7/fff&text=Chawri+Bazar+Market' },
+                        { name: 'Kucha Mahajani', imageUrl: 'https://dummyimage.com/150x150/795548/fff&text=Kucha+Mahajani' },
+                        { name: 'Gali Lohe Wali', imageUrl: 'https://dummyimage.com/150x150/2196F3/fff&text=Gali+Lohe+Wali' },
+                    ];
+
+                case 'Karol Bagh Metro Station':
+                    return [
+                        { name: 'Karol Bagh Market', imageUrl: 'https://dummyimage.com/150x150/4CAF50/fff&text=Karol+Bagh+Market' },
+                        { name: 'Gurudwara Bangla Sahib', imageUrl: 'https://dummyimage.com/150x150/FF9800/fff&text=Gurudwara+Bangla+Sahib' },
+                        { name: 'Ajmal Khan Road', imageUrl: 'https://dummyimage.com/150x150/2196F3/fff&text=Ajmal+Khan+Road' },
+                    ];
+
+                case 'Saket Metro Station':
+                    return [
+                        { name: 'DLF Mall, Saket', imageUrl: 'https://dummyimage.com/150x150/FFC107/fff&text=DLF+Mall,+Saket' },
+                        { name: 'Garden of Five Senses', imageUrl: 'https://dummyimage.com/150x150/E91E63/fff&text=Garden+of+Five+Senses' },
+                        { name: 'Max Super Specialty Hospital', imageUrl: 'https://dummyimage.com/150x150/795548/fff&text=Max+Super+Specialty+Hospital' },
+                    ];
+
+                case 'Jama Masjid Metro Station':
+                    return [
+                        { name: 'Jama Masjid', imageUrl: 'https://dummyimage.com/150x150/FFC107/fff&text=Jama+Masjid' },
+                        { name: 'Red Fort', imageUrl: 'https://dummyimage.com/150x150/FF9800/fff&text=Red+Fort' },
+                        { name: 'Chandni Chowk', imageUrl: 'https://dummyimage.com/150x150/4CAF50/fff&text=Chandni+Chowk' },
+                    ];
+
+                // Add more stations and destinations here...
+
+                default:
+                    return [];
+            }
+        }
+        function showStationInfo(stationName) {
+            var destinations = getDestinations(stationName);
+            var destinationInfo = "<strong>Popular destinations near " + stationName + ":</strong><br>";
+
+            destinations.forEach(function(destination) {
+                destinationInfo += `<div><img src="${destination.imageUrl}" alt="${destination.name}"><br>${destination.name}</div>`;
+            });
+
+            destinationInfoElement.innerHTML = destinationInfo;
+            destinationInfoElement.classList.add('active');
+        }
+        function hideStationInfo() {
+            destinationInfoElement.classList.remove('active');
+        }
+
+        function createStationMarker(lat, lng, name) {
+            var marker = L.marker([lat, lng]);
+            marker.bindPopup(name);
+            marker.on('click', function() {
+                marker.openPopup();
+                showStationInfo(name);
+            });
+            return marker;
+        }
+
+        markers.push(createStationMarker(28.6286, 77.2205, 'New Delhi Metro Station'));
+        markers.push(createStationMarker(28.6328, 77.2208, 'Rajiv Chowk Metro Station'));
+        markers.push(createStationMarker(28.5921, 77.0462, 'Dwarka Sector 21 Metro Station'));
+        markers.push(createStationMarker(28.5494, 77.2019, 'Hauz Khas Metro Station'));
+        markers.push(createStationMarker(28.6765, 77.2357, 'Kashmere Gate Metro Station'));
+        markers.push(createStationMarker(28.5507, 77.2693, 'Malviya Nagar Metro Station'));
+        markers.push(createStationMarker(28.6137, 77.2390, 'Chawri Bazar Metro Station'));
+        markers.push(createStationMarker(28.6416, 77.2232, 'Karol Bagh Metro Station'));
+        markers.push(createStationMarker(28.5713, 77.2330, 'Saket Metro Station'));
+        markers.push(createStationMarker(28.6135, 77.2073, 'Jama Masjid Metro Station'));
+        
+
+        markers.forEach(function(marker) {
+            marker.addTo(map);
+        });
+        map.on('popupclose', function() {
+            hideStationInfo();
+        });
+    </script>
+</body>
+</html>
